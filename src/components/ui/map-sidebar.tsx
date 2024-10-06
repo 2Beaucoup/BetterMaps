@@ -189,7 +189,7 @@ export default function MapSidebar() {
                 }
               >
                 <div className={""}>
-                  <P className={"font-semibold"}>Newton Isaac</P>
+                  <P className={"font-semibold"}>Jerry</P>
                 </div>
 
                 <P className={"text-neutral-900"}>
