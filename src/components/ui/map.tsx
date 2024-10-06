@@ -1,5 +1,5 @@
 "use client";
-import normalizedFoodDesertnessScores from "@/lib/food-desert-metric";
+import normalizedFoodDesertnessScores, { neighborhoodPopulations} from "@/lib/food-desert-metric";
 import chicagoInternet from "@/data/chicago_internet.json";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues, interpolateReds } from "d3-scale-chromatic";
@@ -64,14 +64,6 @@ const newNeighborhoods = [
   "South Chicago",
   "Jefferson Park",
 ];
-
-// create a dictionary where neighborhood name is key and population is value
-const neighborhoodPopulations: { [key: string]: number } = {};
-
-for (const neighborhood in chicagoInternet) {
-  neighborhoodPopulations[neighborhood.toLowerCase()] =
-    chicagoInternet[neighborhood].total_pop;
-}
 
 const MapComponent: React.FC = () => {
   const { setNeighborhood } = useNeighborhood();
@@ -370,8 +362,9 @@ const MapComponent: React.FC = () => {
             style={{ left: hoverInfo.x, top: hoverInfo.y }}
           >
             <p className="text-sm font-semibold">
-              {hoverInfo.feature.properties.pri_neigh} (foodDesertnessScores:{" "}
-              {foodDesertnessScores[hoverInfo.feature.properties.pri_neigh]})
+              {hoverInfo.feature.properties.pri_neigh} (Population:{" "}
+              {neighborhoodPopulations[hoverInfo.feature.properties.pri_neigh]?.toLocaleString() || "N/A"}
+              )
             </p>
           </div>
         )}

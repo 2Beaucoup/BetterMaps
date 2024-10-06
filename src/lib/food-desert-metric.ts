@@ -12,9 +12,13 @@ function uppercase_to_upper_camel_case(str: string) {
 // create a dictionary where neighborhood name is key and population is value
 const neighborhoodPopulations: { [key: string]: number } = {};
 
+const neighborhoodIncome: { [key: string]: number } = {};
+
 for (const neighborhood of chicagoInternet) {
   neighborhoodPopulations[uppercase_to_upper_camel_case(neighborhood.name)] =
     neighborhood.total_pop;
+    neighborhoodIncome[uppercase_to_upper_camel_case(neighborhood.name)] =
+    neighborhood.hh_median_income;
 }
 
 const neighborhoodNumGroceryStores: { [key: string]: number } = {};
@@ -32,11 +36,14 @@ for (const groceryStore of groceryData) {
 // Calculate the food desertness score for each neighborhood
 const foodDesertnessScores: { [key: string]: number } = {};
 
+const averageMedianIncome = Object.values(neighborhoodIncome).reduce((a, b) => a + b, 0) / Object.values(neighborhoodIncome).length;
+
 for (const neighborhood in neighborhoodPopulations) {
   const population = neighborhoodPopulations[neighborhood];
   const numGroceryStores =
     (neighborhoodNumGroceryStores[neighborhood] as number) || 1; // Avoid division by zero
-  const score = population / numGroceryStores;
+    const medianIncome = neighborhoodIncome[neighborhood] || averageMedianIncome;
+  const score = (population / numGroceryStores) * (averageMedianIncome / medianIncome);
   foodDesertnessScores[neighborhood] = score;
 }
 
@@ -53,3 +60,4 @@ for (const neighborhood in foodDesertnessScores) {
 }
 
 export default normalizedFoodDesertnessScores;
+export { neighborhoodPopulations, neighborhoodNumGroceryStores, neighborhoodIncome };
