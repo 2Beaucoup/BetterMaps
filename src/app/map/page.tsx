@@ -1,7 +1,6 @@
 import { NeighborhoodProvider } from "@/components/providers/neighborhood-provider";
 import MapComponent from "@/components/ui/map";
 import MapSidebar from "@/components/ui/map-sidebar";
-import Image from "next/image";
 
 export default function Map() {
   return (

@@ -16,7 +16,7 @@ import normalizedFoodDesertnessScores, {
 import { H2, H3, H4, P } from "./typography";
 import { Separator } from "./separator";
 import { Input } from "./input";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const Attribute = ({ label, value }: { label: string; value: string }) => (
   <div className={"flex flex-col gap-2 w-full"}>
@@ -25,6 +25,8 @@ const Attribute = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 export default function MapSidebar() {
+  const { neighborhood } = useNeighborhood();
+
   const sendMessageToLLM = async (message: string) => {
     // clear coach message
 
@@ -42,7 +44,7 @@ export default function MapSidebar() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, neighborhood }),
       });
 
       const data = await response.text();
@@ -74,8 +76,6 @@ export default function MapSidebar() {
   const [message, setMessage] = useState("");
   const [coachMessage, setCoachMessage] = useState("");
   const [generating, setGenerating] = useState(false);
-
-  const { neighborhood } = useNeighborhood();
 
   const income = neighborhoodIncome[neighborhood as string];
   const foodDesertScore =
