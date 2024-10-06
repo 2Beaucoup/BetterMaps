@@ -1,5 +1,7 @@
 "use client";
-import normalizedFoodDesertnessScores, { neighborhoodPopulations} from "@/lib/food-desert-metric";
+import normalizedFoodDesertnessScores, {
+  neighborhoodPopulations,
+} from "@/lib/food-desert-metric";
 import chicagoInternet from "@/data/chicago_internet.json";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues, interpolateReds } from "d3-scale-chromatic";
@@ -234,7 +236,7 @@ const MapComponent: React.FC = () => {
   // Create a color scale based on the normalized food desertness scores
   const foodDesertnessScores = normalizedFoodDesertnessScores;
   const colorScaleFoodDeserts = scaleSequential(interpolateBlues).domain([
-    0, 100,
+    0, 50,
   ]);
 
   const paintFoodDeserts = {
@@ -260,6 +262,12 @@ const MapComponent: React.FC = () => {
     value,
     color: colorScale(value),
   }));
+
+  const legendItemsFoodDesert = d3.range(0, 101, 10).map((value) => ({
+    value,
+    color: colorScaleFoodDeserts(value),
+  }));
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <Map
@@ -340,7 +348,7 @@ const MapComponent: React.FC = () => {
         bearing={viewState.bearing}
       />
 
-      <div className="absolute bottom-0 right-0 m-4 p-2 bg-white rounded shadow">
+      <div className="absolute bottom-0 right-0 m-2 p-2 bg-white rounded shadow">
         <h4 className="text-sm font-semibold">Internet Percentage</h4>
         <div className="flex flex-col">
           {legendItems.map((item) => (
@@ -355,6 +363,21 @@ const MapComponent: React.FC = () => {
         </div>
       </div>
 
+      <div className="absolute top-24 right-0 m-2 p-2 bg-white rounded shadow">
+        <h4 className="text-sm font-semibold">Food Desert Score</h4>
+        <div className="flex flex-col">
+          {legendItemsFoodDesert.map((item) => (
+            <div key={item.value} className="flex items-center">
+              <div
+                className="w-4 h-4 mr-2"
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-sm">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div>
         {hoverInfo && (
           <div
@@ -363,7 +386,9 @@ const MapComponent: React.FC = () => {
           >
             <p className="text-sm font-semibold">
               {hoverInfo.feature.properties.pri_neigh} (Population:{" "}
-              {neighborhoodPopulations[hoverInfo.feature.properties.pri_neigh]?.toLocaleString() || "N/A"}
+              {neighborhoodPopulations[
+                hoverInfo.feature.properties.pri_neigh
+              ]?.toLocaleString() || "N/A"}
               )
             </p>
           </div>
