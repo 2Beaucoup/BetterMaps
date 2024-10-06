@@ -1,12 +1,16 @@
 "use client";
 import neighborhoods from "@/data/neighborhood_names.json";
-
+import chicagoInternet from "@/data/chicago_internet.json";
+import { scaleSequential } from "d3-scale";
+import { interpolateBlues, interpolateReds } from "d3-scale-chromatic";
 import React, { useState, useEffect, useCallback } from "react";
 import Map, { Source, Layer, MapRef } from "react-map-gl";
-
+import * as d3 from "d3";
 import { scaleOrdinal } from "d3-scale";
 import { schemeCategory10 } from "d3-scale-chromatic";
 import { useNeighborhood } from "../providers/neighborhood-provider";
+import { Toggle } from "./toggle";
+import { Label } from "./label";
 
 // import the neighborhood names json
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -61,6 +65,9 @@ const newNeighborhoods = [
 
 const MapComponent: React.FC = () => {
   const { setNeighborhood } = useNeighborhood();
+  const [internetData, setInternetData] = useState<{ [key: string]: number }>(
+    {},
+  );
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<
     string | null
   >(null);
@@ -159,11 +166,13 @@ const MapComponent: React.FC = () => {
     }
   }, []);
 
+  // color the neighborhoods based on the neighborhood's % of households with internet from chicago_internet.json
+  // use the d3 color scale to color the neighborhoods
+
   // Create a color scale
-  const colorScale = scaleOrdinal(schemeCategory10).domain(newNeighborhoods);
 
   // Generate the paint property dynamically
-  const paint = {
+  /*const paint = {
     "fill-color": [
       "case",
       ["==", ["get", "pri_neigh"], hoveredNeighborhood],
@@ -179,8 +188,48 @@ const MapComponent: React.FC = () => {
       ],
     ],
     "fill-opacity": 0.8,
+  };*/
+
+  let max = 0;
+  useEffect(() => {
+    // Load the internet data
+    const data = chicagoInternet.reduce((acc, item) => {
+      acc[item.name] = item["hh_no_computer(%)"];
+      if (item["hh_no_computer(%)"] > max) {
+        max = item["hh_no_computer(%)"];
+      }
+      return acc;
+    }, {});
+
+    setInternetData(data);
+  }, []);
+
+  // Create a color scale based on the internet percentage
+  const colorScale = scaleSequential(interpolateReds).domain([0, 25]); // Assuming the percentage ranges from 0 to 100
+
+  const paint = {
+    "fill-color": [
+      "case",
+      ["==", ["get", "pri_neigh"], hoveredNeighborhood],
+      "#ff0000", // Highlight color
+      [
+        "match",
+        ["get", "pri_neigh"],
+        ...Object.keys(internetData).flatMap((neighborhood) => [
+          neighborhood,
+          colorScale(internetData[neighborhood]),
+        ]),
+        "#ccc", // default color
+      ],
+    ],
+    "fill-opacity": 0.8,
   };
 
+  // Generate legend items
+  const legendItems = d3.range(0, 40, 5).map((value) => ({
+    value,
+    color: colorScale(value),
+  }));
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <Map
@@ -244,6 +293,21 @@ const MapComponent: React.FC = () => {
         bearing={viewState.bearing}
       />
 
+      <div className="absolute bottom-0 right-0 m-4 p-2 bg-white rounded shadow">
+        <h4 className="text-sm font-semibold">Internet Percentage</h4>
+        <div className="flex flex-col">
+          {legendItems.map((item) => (
+            <div key={item.value} className="flex items-center">
+              <div
+                className="w-4 h-4 mr-2"
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-sm">{item.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div>
         {hoverInfo && (
           <div
@@ -255,6 +319,15 @@ const MapComponent: React.FC = () => {
             </p>
           </div>
         )}
+      </div>
+
+      <div
+        className={
+          "bg-white rounded-lg p-2 absolute top-0 right-0 shadow m-2 flex flex-col"
+        }
+      >
+        <Label>3D Buildings</Label>
+        <Toggle />
       </div>
     </div>
   );
