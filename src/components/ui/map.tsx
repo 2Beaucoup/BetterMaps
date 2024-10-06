@@ -26,6 +26,9 @@ const MapInfo: React.FC<MapInfoProps> = ({ latitude, longitude, zoom, pitch, bea
       <p className="text-sm">
         Lat: <span className={'font-semibold'}>{latitude.toFixed(4)}</span>, Lon: <span className={'font-semibold'}>{longitude.toFixed(4)}</span>
       </p>
+      <p className="text-sm">
+        Zoom: <span className={'font-semibold'}>{zoom.toFixed(2)}</span>, Pitch: <span className={'font-semibold'}>{pitch.toFixed(2)}</span>, Bearing: <span className={'font-semibold'}>{bearing.toFixed(2)}</span>
+        </p>
     </div>
   );
 };
@@ -47,6 +50,7 @@ const newNeighborhoods = [
 ]
 
 const MapComponent: React.FC = () => {
+    const [hoveredNeighborhood, setHoveredNeighborhood] = useState<string | null>(null);
     const [hoverInfo, setHoverInfo] = useState<HoverInfo | undefined>();
 
   const [viewState, setViewState] = useState({
@@ -125,6 +129,12 @@ const MapComponent: React.FC = () => {
                 }
                 : undefined
         );
+
+        if (hoveredFeature) {
+            setHoveredNeighborhood(hoveredFeature.properties.pri_neigh);
+        } else {
+            setHoveredNeighborhood(null);
+        }
     }, []);
 
     // Create a color scale
@@ -133,10 +143,13 @@ const colorScale = scaleOrdinal(schemeCategory10).domain(newNeighborhoods);
 // Generate the paint property dynamically
 const paint = {
     'fill-color': [
-        'match',
-        ['get', 'pri_neigh'],
-        ...newNeighborhoods.flatMap(neighborhood => [neighborhood, colorScale(neighborhood)]),
-        '#ccc' // default color
+        'case',
+        ['==', ['get', 'pri_neigh'], hoveredNeighborhood], '#ff0000', // Highlight color
+        ['match',
+            ['get', 'pri_neigh'],
+            ...newNeighborhoods.flatMap(neighborhood => [neighborhood, colorScale(neighborhood)]),
+            '#ccc' // default color
+        ]
     ],
     'fill-opacity': 0.8
 };
@@ -150,6 +163,9 @@ const paint = {
         style={{width: '100%', height: '100%'}}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         mapboxAccessToken={MAPBOX_TOKEN}
+        minZoom={10.5}
+        pitchWithRotate={true}
+        maxZoom={20}
         interactiveLayerIds={['neighborhoods-layer']}
         onClick={handleClick}
         ref={mapRef}
@@ -188,6 +204,19 @@ const paint = {
         pitch={viewState.pitch}
         bearing={viewState.bearing}
       />
+
+      <div>
+        {hoverInfo && (
+          <div
+            className="absolute z-10 p-2 bg-white rounded shadow pointer-events-none"
+            style={{ left: hoverInfo.x, top: hoverInfo.y }}
+          >
+            <p className="text-sm font-semibold">
+              {hoverInfo.feature.properties.pri_neigh}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
