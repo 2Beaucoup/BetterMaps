@@ -11,7 +11,7 @@ export default function Home() {
       >
         <LandingH1 className={"font-semibold text-center text-slate-700"}>
           Explore <span className={"text-yellow-600"}>Your Community</span> Like
-          You've <br className={"hidden lg:block"} />
+          You&apos;ve <br className={"hidden lg:block"} />
           Never Done Before.
         </LandingH1>
 
@@ -20,8 +20,8 @@ export default function Home() {
             "text-xl max-w-md text-center font-medium leading-8 text-muted-foreground"
           }
         >
-          Our full stack curriculum is free and supported by a passionate open
-          source community.
+          Discover the hidden gems in your neighborhood, learn about the people
+          who live there, and find out how you can make a difference.
         </P>
 
         <div className={"w-full"}>
