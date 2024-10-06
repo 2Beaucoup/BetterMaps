@@ -208,9 +208,9 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     // Load the internet data
     const data = chicagoInternet.reduce((acc, item) => {
-      acc[item.name] = item["hh_no_internet(%)"];
-      if (item["hh_no_internet(%)"] > max) {
-        max = item["hh_no_internet(%)"];
+      acc[item.name] = item["hh_no_computer(%)"];
+      if (item["hh_no_computer(%)"] > max) {
+        max = item["hh_no_computer(%)"];
       }
       return acc;
     }, {});
@@ -241,7 +241,9 @@ const MapComponent: React.FC = () => {
 
   // Create a color scale based on the normalized food desertness scores
   const foodDesertnessScores = normalizedFoodDesertnessScores;
-  const colorScaleFoodDeserts = scaleSequential(interpolateBlues).domain([0, 100]);
+  const colorScaleFoodDeserts = scaleSequential(interpolateBlues).domain([
+    0, 100,
+  ]);
 
   const paintFoodDeserts = {
     "fill-color": [
@@ -284,24 +286,23 @@ const MapComponent: React.FC = () => {
         onMouseMove={onHover}
       >
         <Layer
-            type="line"
-            id="outline"
-            source="neighborhoods"
-            layout={{}}
-            paint={{
-              "line-color": "#000",
-              "line-width": 2,
-            }}
-            />
+          type="line"
+          id="outline"
+          source="neighborhoods"
+          layout={{}}
+          paint={{
+            "line-color": "#000",
+            "line-width": 2,
+          }}
+        />
 
-{visualizeFoodDeserts && (
+        {visualizeFoodDeserts && (
           <Source
             id="neighborhoods"
             type="geojson"
             data="/data/chicago-boundaries.geojson"
           >
             <Layer
-            
               id="neighborhoods-layer-2"
               type="fill"
               source="neighborhoods"
@@ -324,8 +325,6 @@ const MapComponent: React.FC = () => {
             />
           </Source>
         )}
-
-
 
         {/* Add Source and Layer for neighborhoods here if needed */}
         {selectedNeighborhood && (
@@ -372,12 +371,7 @@ const MapComponent: React.FC = () => {
           >
             <p className="text-sm font-semibold">
               {hoverInfo.feature.properties.pri_neigh} (foodDesertnessScores:{" "}
-              {
-                foodDesertnessScores[
-                  hoverInfo.feature.properties.pri_neigh.toLowerCase()
-                ]
-              }
-              )
+              {foodDesertnessScores[hoverInfo.feature.properties.pri_neigh]})
             </p>
           </div>
         )}

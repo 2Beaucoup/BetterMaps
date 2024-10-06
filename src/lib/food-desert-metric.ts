@@ -1,11 +1,19 @@
 import groceryData from "@/data/Grocery.json";
 import chicagoInternet from "@/data/chicago_internet.json";
 
+function uppercase_to_upper_camel_case(str: string) {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 // create a dictionary where neighborhood name is key and population is value
 const neighborhoodPopulations: { [key: string]: number } = {};
 
 for (const neighborhood of chicagoInternet) {
-  neighborhoodPopulations[neighborhood.name.toLowerCase()] =
+  neighborhoodPopulations[uppercase_to_upper_camel_case(neighborhood.name)] =
     neighborhood.total_pop;
 }
 
@@ -13,11 +21,11 @@ const neighborhoodNumGroceryStores: { [key: string]: number } = {};
 
 for (const groceryStore of groceryData) {
   neighborhoodNumGroceryStores[
-    groceryStore["COMMUNITY AREA NAME"].toLowerCase()
+    uppercase_to_upper_camel_case(groceryStore["COMMUNITY AREA NAME"])
   ] =
     ((1 +
       neighborhoodNumGroceryStores[
-        groceryStore["COMMUNITY AREA NAME"].toLowerCase()
+        groceryStore["COMMUNITY AREA NAME"]
       ]) as number) || 0;
 }
 
@@ -30,7 +38,6 @@ for (const neighborhood in neighborhoodPopulations) {
     (neighborhoodNumGroceryStores[neighborhood] as number) || 1; // Avoid division by zero
   const score = population / numGroceryStores;
   foodDesertnessScores[neighborhood] = score;
-
 }
 
 // Normalize the scores to a scale of 0 to 100
