@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import Image from "next/image";
 import { useNeighborhood } from "../providers/neighborhood-provider";
 import normalizedFoodDesertnessScores, {
@@ -39,12 +46,25 @@ export default function MapSidebar() {
       <div className={"flex flex-col gap-2 w-full"}>
         <div className={"flex gap-2 items-center w-full"}>
           <p>Food Desert Score</p>
-          <Image
-            src="/icons/info.svg"
-            width={16}
-            height={16}
-            alt="Food Desert Score"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Image
+                  src="/icons/info.svg"
+                  width={16}
+                  height={16}
+                  alt="Food Desert Score"
+                />
+              </TooltipTrigger>
+              <TooltipContent className={"max-w-md"}>
+                <P>
+                  {" "}
+                  A higher score indicates worse access to grocery stores,
+                  suggesting a higher likelihood of being a food desert.
+                </P>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <b className={"w-full p-2 rounded-md bg-muted"}>
