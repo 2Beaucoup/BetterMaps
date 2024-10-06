@@ -22,10 +22,10 @@ type NavOption = {
   href: string;
 };
 const navOptions: NavOption[] = [
-    {
-        name: "Interactive Map",
-        href: "/map",
-      },
+  {
+    name: "Interactive Map",
+    href: "/map",
+  },
   {
     name: "Sign in",
     href: "/auth/login",

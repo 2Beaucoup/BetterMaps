@@ -5,7 +5,9 @@ export default function Home() {
   return (
     <div className="max-h-[800px] overflow-crop p-8 pb-20 gap-6 sm:p-20">
       <div
-        className={"relative flex flex-col gap-4 items-center justify-items-center"}
+        className={
+          "relative flex flex-col gap-4 items-center justify-items-center"
+        }
       >
         <LandingH1 className={"font-semibold text-center text-slate-700"}>
           Explore <span className={"text-yellow-600"}>Your Community</span> Like

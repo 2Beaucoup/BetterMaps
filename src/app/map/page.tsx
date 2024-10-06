@@ -1,11 +1,21 @@
+import { NeighborhoodProvider } from "@/components/providers/neighborhood-provider";
 import MapComponent from "@/components/ui/map";
-import { LandingH1, P } from "@/components/ui/typography";
+import MapSidebar from "@/components/ui/map-sidebar";
+import { H3, LandingH1, P } from "@/components/ui/typography";
 import Image from "next/image";
 
 export default function Map() {
   return (
     <div className="gap-4">
-        <MapComponent />
+      <div className={"flex w-full h-full"}>
+        <NeighborhoodProvider>
+          <div className={"w-full bg-red-50"}>
+            <MapComponent />
+          </div>
+
+          <MapSidebar />
+        </NeighborhoodProvider>
+      </div>
     </div>
   );
 }
