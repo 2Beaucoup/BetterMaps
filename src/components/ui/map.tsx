@@ -70,7 +70,7 @@ const newNeighborhoods = [
 const MapComponent: React.FC = () => {
   const { setNeighborhood } = useNeighborhood();
   const [visualizeDigitalDisparity, setVisualizeDigitalDisparity] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [visualizeFoodDeserts, setVisualizeFoodDeserts] =
     useState<boolean>(false);
   const [internetData, setInternetData] = useState<{ [key: string]: number }>(
@@ -353,7 +353,7 @@ const MapComponent: React.FC = () => {
             filter={["==", ["get", "pri_neigh"], selectedNeighborhood]}
             paint={{
               "line-color": "#0000ff",
-              "line-width": 3,
+              "line-width": 1,
             }}
           />
         )}
@@ -366,35 +366,39 @@ const MapComponent: React.FC = () => {
         bearing={viewState.bearing}
       />
 
-      <div className="absolute bottom-0 right-0 m-2 p-2 bg-white rounded shadow">
-        <h4 className="text-sm font-semibold">Internet Percentage</h4>
-        <div className="flex flex-col">
-          {legendItems.map((item) => (
-            <div key={item.value} className="flex items-center">
-              <div
-                className="w-4 h-4 mr-2"
-                style={{ backgroundColor: item.color }}
-              ></div>
-              <span className="text-sm">{item.value}%</span>
-            </div>
-          ))}
+      {visualizeDigitalDisparity && (
+        <div className="absolute bottom-0 right-0 m-2 p-2 bg-white rounded shadow">
+          <h4 className="text-sm font-semibold">Internet Percentage</h4>
+          <div className="flex flex-col">
+            {legendItems.map((item) => (
+              <div key={item.value} className="flex items-center">
+                <div
+                  className="w-4 h-4 mr-2"
+                  style={{ backgroundColor: item.color }}
+                ></div>
+                <span className="text-sm">{item.value}%</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="absolute top-24 right-0 m-2 p-2 bg-white rounded shadow">
-        <h4 className="text-sm font-semibold">Food Desert Score</h4>
-        <div className="flex flex-col">
-          {legendItemsFoodDesert.map((item) => (
-            <div key={item.value} className="flex items-center">
-              <div
-                className="w-4 h-4 mr-2"
-                style={{ backgroundColor: item.color }}
-              ></div>
-              <span className="text-sm">{item.value}</span>
-            </div>
-          ))}
+      {visualizeFoodDeserts && (
+        <div className="absolute top-24 right-0 m-2 p-2 bg-white rounded shadow">
+          <h4 className="text-sm font-semibold">Food Desert Score</h4>
+          <div className="flex flex-col">
+            {legendItemsFoodDesert.map((item) => (
+              <div key={item.value} className="flex items-center">
+                <div
+                  className="w-4 h-4 mr-2"
+                  style={{ backgroundColor: item.color }}
+                ></div>
+                <span className="text-sm">{item.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         {hoverInfo && (

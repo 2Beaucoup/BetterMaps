@@ -125,7 +125,10 @@ export default function MapSidebar() {
             {foodDesertScore ? foodDesertScore.toFixed(2) : ""}
           </b>
         </div>
-        <Attribute label="AQD Score (2005-2021)" value={"-50.7316%"} />
+        <Attribute
+          label="Change in AQD Score (2005-2021)"
+          value={"-50.7316%"}
+        />
 
         <Separator />
 
@@ -137,24 +140,18 @@ export default function MapSidebar() {
           }
         >
           <div className={"flex gap-4"}>
-            <Image
-              src={"/images/coach.svg"}
-              alt={"Isometric chess board"}
-              width={56}
-              height={56}
+            <div
               className={
-                "rounded-lg bg-neutral-600 aspect-square w-16 h-16 pt-1"
+                "flex flex-col justify-center text-sm self-start gap-2"
               }
-            />
-
-            <div className={"flex flex-col justify-center text-sm self-start"}>
+            >
               <div className={""}>
-                <P className={"font-semibold"}>Coach Nelson</P>
+                <P className={"font-semibold"}>Newton Isaac</P>
               </div>
 
               <P className={"text-neutral-900"}>
                 {coachMessage ||
-                  "Ask me anything about chess! I'll help you out."}
+                  `Ask me anything about ${neighborhood ? neighborhood : "Chicago"}! I'll help you out.`}
               </P>
             </div>
           </div>

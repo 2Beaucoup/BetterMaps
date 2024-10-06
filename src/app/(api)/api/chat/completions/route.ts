@@ -37,8 +37,6 @@ async function completeContextMessage(
     },
   );
 
-  console.log(response.data, response.status);
-
   return response.data;
 }
 

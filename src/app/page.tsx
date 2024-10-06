@@ -17,7 +17,7 @@ export default function Home() {
 
         <P
           className={
-            "text-xl max-w-md text-center font-medium leading-8 text-muted-foreground"
+            "text-xl max-w-xl text-center font-medium leading-8 text-muted-foreground"
           }
         >
           Discover the hidden gems in your neighborhood, learn about the people
