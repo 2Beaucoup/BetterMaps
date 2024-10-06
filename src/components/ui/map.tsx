@@ -326,6 +326,24 @@ const MapComponent: React.FC = () => {
           </Source>
         )}
 
+        {!visualizeDigitalDisparity && !visualizeFoodDeserts && (
+          <Source
+            id="neighborhoods"
+            type="geojson"
+            data="/data/chicago-boundaries.geojson"
+          >
+            <Layer
+              id="neighborhoods-layer"
+              type="fill"
+              source="neighborhoods"
+              paint={{
+                "fill-color": "#ccc",
+                "fill-opacity": 0.8,
+              }}
+            />
+          </Source>
+        )}
+
         {/* Add Source and Layer for neighborhoods here if needed */}
         {selectedNeighborhood && (
           <Layer
