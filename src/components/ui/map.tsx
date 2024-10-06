@@ -1,5 +1,5 @@
 "use client";
-import neighborhoods from "@/data/neighborhood_names.json";
+import normalizedFoodDesertnessScores from "@/lib/food-desert-metric";
 import chicagoInternet from "@/data/chicago_internet.json";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues, interpolateReds } from "d3-scale-chromatic";
@@ -11,6 +11,8 @@ import { schemeCategory10 } from "d3-scale-chromatic";
 import { useNeighborhood } from "../providers/neighborhood-provider";
 import { Toggle } from "./toggle";
 import { Label } from "./label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "./separator";
 
 // import the neighborhood names json
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -63,8 +65,20 @@ const newNeighborhoods = [
   "Jefferson Park",
 ];
 
+// create a dictionary where neighborhood name is key and population is value
+const neighborhoodPopulations: { [key: string]: number } = {};
+
+for (const neighborhood in chicagoInternet) {
+  neighborhoodPopulations[neighborhood.toLowerCase()] =
+    chicagoInternet[neighborhood].total_pop;
+}
+
 const MapComponent: React.FC = () => {
   const { setNeighborhood } = useNeighborhood();
+  const [visualizeDigitalDisparity, setVisualizeDigitalDisparity] =
+    useState<boolean>(false);
+  const [visualizeFoodDeserts, setVisualizeFoodDeserts] =
+    useState<boolean>(false);
   const [internetData, setInternetData] = useState<{ [key: string]: number }>(
     {},
   );
@@ -194,9 +208,9 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     // Load the internet data
     const data = chicagoInternet.reduce((acc, item) => {
-      acc[item.name] = item["hh_no_computer(%)"];
-      if (item["hh_no_computer(%)"] > max) {
-        max = item["hh_no_computer(%)"];
+      acc[item.name] = item["hh_no_internet(%)"];
+      if (item["hh_no_internet(%)"] > max) {
+        max = item["hh_no_internet(%)"];
       }
       return acc;
     }, {});
@@ -207,7 +221,7 @@ const MapComponent: React.FC = () => {
   // Create a color scale based on the internet percentage
   const colorScale = scaleSequential(interpolateReds).domain([0, 25]); // Assuming the percentage ranges from 0 to 100
 
-  const paint = {
+  const paintDigitalDisparity = {
     "fill-color": [
       "case",
       ["==", ["get", "pri_neigh"], hoveredNeighborhood],
@@ -218,6 +232,28 @@ const MapComponent: React.FC = () => {
         ...Object.keys(internetData).flatMap((neighborhood) => [
           neighborhood,
           colorScale(internetData[neighborhood]),
+        ]),
+        "#ccc", // default color
+      ],
+    ],
+    "fill-opacity": 0.8,
+  };
+
+  // Create a color scale based on the normalized food desertness scores
+  const foodDesertnessScores = normalizedFoodDesertnessScores;
+  const colorScaleFoodDeserts = scaleSequential(interpolateBlues).domain([0, 100]);
+
+  const paintFoodDeserts = {
+    "fill-color": [
+      "case",
+      ["==", ["get", "pri_neigh"], hoveredNeighborhood],
+      "#ff0000", // Highlight color
+      [
+        "match",
+        ["get", "pri_neigh"],
+        ...Object.keys(foodDesertnessScores).flatMap((neighborhood) => [
+          neighborhood,
+          colorScaleFoodDeserts(foodDesertnessScores[neighborhood]),
         ]),
         "#ccc", // default color
       ],
@@ -241,37 +277,57 @@ const MapComponent: React.FC = () => {
         minZoom={10.5}
         pitchWithRotate={true}
         maxZoom={20}
-        interactiveLayerIds={["neighborhoods-layer"]}
+        interactiveLayerIds={["neighborhoods-layer", "neighborhoods-layer-2"]}
         onClick={handleClick}
         ref={mapRef}
         onLoad={onMapLoad}
         onMouseMove={onHover}
       >
-        {/* Add Source and Layer for neighborhoods here if needed */}
         <Layer
-          id="HoverInfo"
-          type="line"
-          layout={{ "line-join": "round", "line-cap": "round" }}
-          paint={{
-            "line-color": "#000",
-            "line-width": 2,
-          }}
-          source="neighborhoods"
-        />
-
-        <Source
-          id="neighborhoods"
-          type="geojson"
-          data="/data/chicago-boundaries.geojson"
-        >
-          <Layer
-            id="neighborhoods-layer"
-            type="fill"
+            type="line"
+            id="outline"
             source="neighborhoods"
-            paint={paint}
-          />
-        </Source>
+            layout={{}}
+            paint={{
+              "line-color": "#000",
+              "line-width": 2,
+            }}
+            />
 
+{visualizeFoodDeserts && (
+          <Source
+            id="neighborhoods"
+            type="geojson"
+            data="/data/chicago-boundaries.geojson"
+          >
+            <Layer
+            
+              id="neighborhoods-layer-2"
+              type="fill"
+              source="neighborhoods"
+              paint={paintFoodDeserts}
+            />
+          </Source>
+        )}
+
+        {visualizeDigitalDisparity && (
+          <Source
+            id="neighborhoods"
+            type="geojson"
+            data="/data/chicago-boundaries.geojson"
+          >
+            <Layer
+              id="neighborhoods-layer"
+              type="fill"
+              source="neighborhoods"
+              paint={paintDigitalDisparity}
+            />
+          </Source>
+        )}
+
+
+
+        {/* Add Source and Layer for neighborhoods here if needed */}
         {selectedNeighborhood && (
           <Layer
             id="selected-neighborhood-layer"
@@ -315,7 +371,13 @@ const MapComponent: React.FC = () => {
             style={{ left: hoverInfo.x, top: hoverInfo.y }}
           >
             <p className="text-sm font-semibold">
-              {hoverInfo.feature.properties.pri_neigh}
+              {hoverInfo.feature.properties.pri_neigh} (foodDesertnessScores:{" "}
+              {
+                foodDesertnessScores[
+                  hoverInfo.feature.properties.pri_neigh.toLowerCase()
+                ]
+              }
+              )
             </p>
           </div>
         )}
@@ -323,11 +385,30 @@ const MapComponent: React.FC = () => {
 
       <div
         className={
-          "bg-white rounded-lg p-2 absolute top-0 right-0 shadow m-2 flex flex-col"
+          "bg-white rounded-lg p-4 absolute top-0 right-0 shadow m-2 flex flex-col justify-center gap-2"
         }
       >
-        <Label>3D Buildings</Label>
-        <Toggle />
+        <div className={"flex items-start gap-2 justify-start"}>
+          <Switch
+            id="digital-disparity"
+            checked={visualizeDigitalDisparity}
+            onCheckedChange={(val) => setVisualizeDigitalDisparity(val)}
+          />
+          <Label htmlFor={"digital-disparity"}>
+            Visualize Digital Disparity
+          </Label>
+        </div>
+
+        <Separator />
+
+        <div className={"flex items-start justify-start gap-2"}>
+          <Switch
+            id="food-deserts"
+            checked={visualizeFoodDeserts}
+            onCheckedChange={(val) => setVisualizeFoodDeserts(val)}
+          />
+          <Label htmlFor={"food-deserts"}>Visualize Food Deserts</Label>
+        </div>
       </div>
     </div>
   );
